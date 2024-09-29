@@ -1,0 +1,902 @@
+LAB TASK 1 & 2
+Header.php:
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Untitled Document</title>
+</head>
+
+<body>
+
+<?php
+//extract($_POST);
+
+//connect to server
+$connect = mysqli_connect ("localhost", "root", "", "klinik_ajwa");
+
+if (!$connect){
+    die ('ERROR:'.mysqli_connect_error());
+}
+
+?>
+</body>
+</html>
+
+
+
+
+Login.php:
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Klinik Ajwa</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</head>
+
+<body>
+<?php
+    //call file to connect server Klinik Ajwa
+    include ("header.php");
+?>
+
+<?php
+    //This section processes submissions from the login form
+    //Check if the form has been submitted
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
+        //validate the username
+        if (!empty($_POST['ID'])) {
+            $un = mysqli_real_escape_string($connect, $_POST['ID']);
+        } else {
+            $un = FALSE;
+            echo '<p class = "error"> You forgot to enter your ID.</p>';
+        }
+
+        //validate the password
+        if (!empty($_POST['Password'])) {
+            $p = mysqli_real_escape_string($connect, $_POST['Password']);
+        } else {
+            $p = FALSE;
+            echo '<p class = "error"> You forgot to enter your password.</p>';
+        }
+
+        //if no problems
+        if ($un && $p) {
+
+            //Retrieve the id, firstname, lastname, for the username and password combination
+            $q = "SELECT ID, FirstName, LastName, Specialization, Password FROM Doktor WHERE (ID = '$un' AND Password ='$p')";
+
+            //run the query and assign it to the variable $result
+            $result = mysqli_query($connect, $q);
+
+            //count the number of rows that match the username/password combination
+            //if one database row (record) matches the input:
+            if (@mysqli_num_rows($result) == 1) {
+                //start the session, fetch the record and insert the three values in an array
+                session_start();
+                $_SESSION = mysqli_fetch_array($result, MYSQLI_ASSOC);
+
+                echo '<p haiiiaiaiiaiaiaia</p>';
+
+                //Cancel the rest of the script
+                exit();
+
+                mysqli_free_result($result);
+                mysqli_close($connect);
+                //no match was made
+            } else {
+                echo '<p class = "error"> The username and password entered do not match our records <br> Perhaps you need to register, just click the Register button</p>';
+            }
+        } else { //if there was a problem
+            echo '<p class = "error"> Please try again. </p>';
+        }
+
+        mysqli_close($connect);
+    }
+?>
+
+<h2 align = "center">LOGIN</h2>
+
+<form action = "login.php" method = "post">
+    <p><label class = "label" for = "ID"> ID: </label>
+    <input id = "ID" type = "text" name = "ID" size = "4" maxlength = "6" 
+    value = "<?php if (isset($_POST['ID'])) echo $_POST['ID']; ?>" /></p>
+
+    <p><label class = "label" for = "Password"> Password: </label>
+    <input id = "Password" type = "password" name = "Password" size = "15" maxlength = "60"
+    value = "<?php if (isset($_POST['Password'])) echo $_POST['Password']; ?>" /></p>
+    <p>&nbsp;</p>
+
+    <p align = "left"><input id = "submit" type = "submit" name = "submit" value = "login" /> &nbsp;</p>
+    <p align = "left"><input id = "reset" type = "reset" name = "reset" value = "login" /></p>
+</form>
+
+<p align = "center">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Don't have an account? 
+<a href = "register.php">Sign up</a></p>
+
+</div>
+</div>
+</body>
+</html>
+
+LAB TASK 3
+Register.php:
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head> <title>Klinik Ajwa</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<body>
+<?php
+// call file to connect to server
+include ("header.php");?>
+
+
+<?php
+// This query inserts a record in the clinic table
+// has form been submitted?
+if ($_SERVER ['REQUEST_METHOD']== 'POST') {
+    $error = array(); // initialize an error array
+
+// Check for a Firstname
+if (empty($_POST ['FirstName_P'])) {
+        $error [] = 'You forgot to enter your first Name.';
+} 
+else {
+        $n = mysqli_real_escape_string ($connect, trim ($_POST ['FirstName_P']));
+}
+
+
+// Check for a lastName
+if (empty($_POST['LastName_P'])) {
+    $error[] = 'You forgot to enter your last name.';
+} 
+else {
+    $l = mysqli_real_escape_string($connect, trim($_POST['LastName_P']));
+}
+
+// Check for an insurance number
+if (empty($_POST['Insurance_Number'])) {
+    $error[] = 'You forgot to enter your Insurance Number.';
+} 
+else {
+    $i = mysqli_real_escape_string($connect, trim($_POST['Insurance_Number']));
+}
+
+
+// Check for a diagnose
+if (empty($_POST['Diagnose'])) {
+    $error[] = 'You forgot to enter your diagnose.';
+} 
+else {
+    $d = mysqli_real_escape_string($connect, trim($_POST['Diagnose']));
+}
+
+    // register the user in the database
+    // make the query:
+    $q = "Insert INTO pesakit (ID_P, FirstName_P, LastName_P, Insurance_Number, Diagnose)
+    VALUES (' ', '$n', '$l', '$i', '$d')";
+    $result = @mysqli_query ($connect, $q); //run the query
+    if ($result) { // if it runs
+    echo '<h1>thank you</h1>';
+    exit();
+    } else { // if it did not run
+    //message
+    echo '<h1>System error</h1>';
+
+    // debugging message
+    echo '<p>' . mysqli_error($connect) . '<br><br>Query: ' . $q . '</p>';
+    } // end of if (result)
+    mysqli_close($connect); // close the database connection
+    exit();
+
+}// End of the main submit conditional
+?>
+
+<h2>Register</h2>
+<h4> * required field</h4>
+<form action="register.php" method="post">
+
+<p><label class ="label" for ="FirstName_P"> First Name : *</label>
+<input id = "FirstName_P" type="text" name="FirstName_P" size="30" maxlength="150"
+value="<?php if (isset($_POST['FirstName_P'])) echo $_POST ['FirstName_P']; ?>" /></p>
+
+
+<p><label class ="label" for ="LastName_P"> Last Name : *</label>
+<input id = "LastName_P" type="text" name="LastName_P" size="30" maxlength="60"
+value="<?php if (isset($_POST['LastName_P'])) echo $_POST ['LastName_P']; ?>" /></p>
+
+
+<p><label class ="label" for ="Insurance_Number"> Insurance Number : * </label>
+<input id = "Insurance_Number" type="text" name="Insurance_Number" size="12" maxlength="12"
+value="<?php if (isset($_POST['Insurance_Number'])) echo $_POST ['Insurance_Number']; ?>" />
+</p>
+
+<p><label class ="label" for ="Diagnose"> Diagnose : </label></p>
+<textarea name="Diagnose" rows="5" cols="40"><?php if (isset($_POST['Diagnose'])) echo $_POST ['Diagnose']; ?></textarea>
+
+<p><input id="submit" type="submit" name="submit" value="Register" /> &nbsp;&nbsp;
+<input id="reset" type="reset" name="reset" value="Clear All" />
+</p>
+</form>
+<p>
+<br />
+<br />
+<br />
+</body>
+</html>
+Registerdoktor.php:
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head><title>Klinik Ajwa</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</head>
+<body>
+<?php
+// call file to connect to server
+include ("header.php");?>
+
+
+<?php
+//This query inserts a record in the clinic table
+//has form been submitted?
+if ($_SERVER ['REQUEST_METHOD'] == 'POST') {
+    $error = array (); //initialize an error array
+
+//Check for a Firstname
+    if (empty($_POST ['FirstName'])) {
+        $error [] = 'You forgot to enter your first Name.';
+}
+else {
+        $n = mysqli_real_escape_string ($connect, trim ($_POST ['FirstName']));
+}
+
+
+// check for a lastName
+if (empty($_POST['LastName'])){
+    $error [] = 'You forgot to enter your last name.';
+}
+else {
+    $l = mysqli_real_escape_string ($connect, trim ($_POST['LastName']));
+}
+
+// check for a specialization
+if (empty($_POST['Specialization'])){
+    $error [] = 'You forgot to enter your specialization.';
+}
+else {
+    $s = mysqli_real_escape_string ($connect, trim ($_POST['Specialization']));
+}
+
+
+// check for a password
+if (empty($_POST['Password'])){
+    $error [] = 'You forgot to enter your password.';
+}
+else {
+    $p = mysqli_real_escape_string ($connect, trim ($_POST['Password']));
+}
+
+    //register the user in the database
+    //make the query:
+    $q = "Insert INTO doktor (ID, FirstName, LastName, Specialization, Password)
+    VALUES (' ', '$n', '$l', '$s', '$p')";
+    $result = @mysqli_query ($connect, $q); // run the query
+    if ($result){  //if it runs
+    echo '<h1>thank you</h1>';
+    exit();
+    } else {  //if it did not run
+    //message
+    echo '<h1>System error</h1>';
+
+    //debugging message
+    echo '<p>' . mysqli_error($connect). '<br><br>Query: ' . $q . '</p>';
+    } //end of if ($result)
+    mysqli_close($connect);  //close the database connection.
+    exit();
+
+}//End of the main submit conditional
+?>
+
+<h2> Register Doktor</h2>
+<h4> * required field </h4>
+<form action="registerDoktor.php" method ="post">
+
+<p><label class ="label" for ="FirstName"> First Name * </label>
+<input id = "FirstName" type="text" name="FirstName" size="30" maxlength="150" 
+value="<?php if (isset($_POST['FirstName'])) echo $_POST ['FirstName']; ?>" /> </p>
+
+
+<p><label class ="label" for ="LastName"> Last Name * </label>
+<input id = "LastName" type="text" name="LastName" size="30" maxlength="60" 
+value="<?php if (isset($_POST['LastName'])) echo $_POST ['LastName']; ?>" /> </p>
+
+
+<p><label class ="label" for ="Specialization"> Specialization * </label>
+<input id = "Specialization" type="text" name="Specialization" size="12" maxlength="12" 
+value="<?php if (isset($_POST['Specialization'])) echo $_POST ['Specialization']; ?>" /> 
+</p>
+
+<p><label class ="label" for ="Password"> Password * </label>
+<input id = "Password" type="password" name="Password" size="12" maxlength="12" 
+value="<?php if (isset($_POST['Password'])) echo $_POST ['Password']; ?>" /> 
+</p>
+
+
+<p><input id="submit" type="submit" name="submit" value="Register" /> &nbsp;&nbsp;
+<input id="reset" type="reset" name="reset" value="Clear All" />
+</p>
+</form>
+<p>
+<br />
+<br />
+<br />
+</body>
+</html>
+
+LAB TASK 4,5,6
+ListPesakit.php:
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <link rel="stylesheet" type="text/css" href="includes.css" />
+</head>
+
+<body>
+<?php include ("header.php"); ?>
+
+<?php
+//make the query
+$q = "SELECT ID_P, FirstName_P, LastName_P, Insurance_Number, Diagnose FROM pesakit ORDER BY ID_P";
+
+//run the query
+$result = @mysqli_query ($connect, $q);
+
+//if it ran without a problem, display the records
+if ($result) {
+
+  //Table heading
+  echo '<table border="2">
+  <tr><td><b>Edit</b></td>
+  <td><b>Delete</b></td>
+  <td><b>ID patient</b></td>
+  <td><b>First Name</b></td>
+  <td><b>Last Name</b></td>
+  <td><b>Insurance Number</b></td>
+  <td><b>Diagnose</b></td></tr>';
+
+  //Fetch and print all the records
+  while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
+    echo '<tr>
+    <td><a href="edit_pesakit.php?id=' . $row['ID_P'] . '">Edit</a></td>
+    <td><a href="delete_pesakit.php?id=' . $row['ID_P'] . '">Delete</a></td>
+    <td>' . $row['ID_P'] . '</td>
+    <td>' . $row['FirstName_P'] . '</td>
+    <td>' . $row['LastName_P'] . '</td>
+    <td>' . $row['Insurance_Number'] . '</td>
+    <td>' . $row['Diagnose'] . '</td>
+    </tr>';
+  }
+  //Close the table
+  echo '</table>';
+
+  //free up the resources
+  mysqli_free_result ($result);
+} else {
+  //if failed to run
+  echo '<p class="error">The current student could not be retrieved. We apologize for any inconvenience.</p>';
+  
+  //debugging message
+  echo '<p>' . mysqli_error($connect) . '<br><br>Query: ' . $q . '</p>';
+}
+//close the database connection
+mysqli_close($connect);
+?>
+</div>
+</body>
+</html>
+
+Edit_pesakit:
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Untitled Document</title>
+</head>
+
+<body>
+<?php include ("header.php"); ?>
+
+<h2> Edit a record </h2>
+
+<?php
+//look for a valid user id, either through GET or POST
+if (isset ($_GET['id']) && (is_numeric($_GET['id']))) {
+  $id = $_GET['id'];
+} elseif ((isset ($_POST['id'])) && (is_numeric($_POST['id']))) {
+  $id = $_POST['id'];
+} else {
+  echo '<p class="error">This page has been accessed in error.</p>';
+  exit();
+}
+
+if($_SERVER ['REQUEST_METHOD'] == 'POST') {
+  $error = array();
+  
+  //look for FirstName
+  if (empty($_POST['FirstName_P'])) {
+    $error[] = 'You forgot to enter the First Name.';
+  } else {
+    $n = mysqli_real_escape_string($connect, trim($_POST['FirstName_P']));
+  }
+
+  //look for LastName
+  if (empty($_POST['LastName_P'])) {
+    $error[] = 'You forgot to enter the Last Name.';
+  } else {
+    $l = mysqli_real_escape_string($connect, trim($_POST['LastName_P']));
+  }
+
+  //look for Insurance Number
+  if (empty($_POST['InsuranceNumber'])) {
+    $error[] = 'You forgot to enter the Insurance Number.';
+  } else {
+    $in = mysqli_real_escape_string($connect, trim($_POST['InsuranceNumber']));
+  }
+
+  //look for Diagnose
+  if (empty($_POST['Diagnose'])) {
+    $error[] = 'You forgot to enter the Diagnose.';
+  } else {
+    $d = mysqli_real_escape_string($connect, trim($_POST['Diagnose']));
+  }
+
+  //if no problem occurred
+  if (empty($error)) {
+    $q = "SELECT ID_P FROM pesakit WHERE Insurance_Number='$in' AND ID_P != $id";
+    $result = @mysqli_query($connect, $q);
+    
+    if(mysqli_num_rows($result) == 0) {
+      $q = "UPDATE pesakit SET FirstName_P='$n', LastName_P='$l', Insurance_Number='$in', Diagnose='$d' WHERE ID_P='$id' LIMIT 1";
+      $result = @mysqli_query($connect, $q);
+      
+      if(mysqli_affected_rows($connect) == 1) {
+        echo '<h3>The user has been edited</h3>';
+      } else {
+        echo '<p class="error">The user has not been edited due to the system error. We apologize for any convenience.</p>';
+        echo '<p>'. mysqli_error($connect) . '<br /> query: ' . $q . '</p>';
+      }
+    } else {
+      echo '<p class="error">The no ic has already been registered</p>';
+    }
+  } else {
+    echo '<p class="error">The following error(s) occurred: <br />';
+    foreach ($error as $msg) {
+      echo " - $msg<br />\n";
+    }
+    echo '</p><p>Please try again.</p>';
+  }
+}
+
+$q = "SELECT FirstName_P, LastName_P, Insurance_Number, Diagnose FROM pesakit WHERE ID_P=$id";
+$result = @mysqli_query($connect, $q);
+
+if (mysqli_num_rows($result) == 1) {
+  //get patient information
+  $row = mysqli_fetch_array($result, MYSQLI_NUM);
+
+  //create the form
+  echo '<form action="edit_pesakit.php" method="post">
+  <p><label class = "label" for="FirstName_P"> First Name: </label> 
+  <input id = "FirstName_P" type = "text" name = "FirstName_P" size="30" maxlength="30" value="' . $row[0] . '"/></p>';
+  
+  echo '<p><br><label class = "label" for="LastName_P"> Last Name </label>
+  <input id = "LastName_P" type = "text" name = "LastName_P" size="30" maxlength="30" value="' . $row[1] . '"/></p>';
+  
+  echo '<p><br><label class = "label" for="InsuranceNumber"> Insurance Number: </label>
+  <input id = "InsuranceNumber" type = "text" name = "InsuranceNumber" size="30" maxlength="30" value="' . $row[2] . '"/></p>';
+  
+  echo '<p><br><label class = "label" for="Diagnose"> Diagnose: </label>
+  <input id = "Diagnose" type = "text" name = "Diagnose" size="30" maxlength="30" value="' . $row[3] . '"/></p>';
+  
+  echo '<br><p><input id = "submit" type="submit" name="submit" value="Edit"/></p>';
+  
+  echo '<br><input type="hidden" name="id" value="' . $id . '"/>';
+  
+  echo '</form>';
+} else {
+  echo '<p class="error">This page has been accessed in error.</p>';
+}
+
+mysqli_close($connect);
+?>
+</body>
+</html>
+
+Delete_pesakit:
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Untitled Document</title>
+</head>
+
+<body>
+<?php include ("header.php");?>
+
+<h2> Delete a record </h2>
+
+<?php
+//look for a valid user id, either through GET or POST
+if (isset ($_GET['id']) && (is_numeric($_GET['id']))) {
+  $id = $_GET['id'];
+} elseif ((isset ($_POST['id'])) && (is_numeric($_POST['id']))) {
+  $id = $_POST['id'];
+} else {
+  echo '<p class="error">This page has been accessed in error.</p>';
+  exit();
+}
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+  if ($_POST['sure'] == 'Yes') { // Delete the record
+    $q = "DELETE FROM pesakit WHERE ID_P=$id LIMIT 1";
+    $result = @mysqli_query($connect, $q);
+    
+    if (mysqli_affected_rows($connect) == 1) { //if there was no problem
+      //display message
+      echo '<h3> The record has been deleted.</h3>';
+    } else {
+      //display error message
+      echo '<p class="error">The record could not be deleted.<br>Probably because it does not exist or due to system error. </p>';
+      echo '<p>'.mysqli_error($connect).'<br>Query:'.$q.'</p>'; //debugging message
+    }
+  } else {
+    echo '<h3>The user has NOT been deleted.</h3>';
+  }
+} else { //display the form
+  $q = "SELECT FirstName_P FROM pesakit WHERE ID_P = $id";
+  $result = @mysqli_query($connect, $q);
+
+  if (mysqli_num_rows($result) == 1) {
+    //Get the member's data
+    $row = mysqli_fetch_array($result, MYSQLI_NUM);
+    echo '<h3>Are sure you want to permanently delete ' . $row[0] . '?</h3>';
+    echo '<form action="delete_pesakit.php" method="post">
+    <input id="submit-no" type="submit" name="sure" value="Yes">
+    <input id="submit-no" type="submit" name="sure" value="No">
+    <input type="hidden" name="id" value="' . $id . '">
+    </form>';
+  } else {
+    echo '<p class="error">This page has been accessed in error.</p>';
+  }
+}
+
+mysqli_close($connect);
+?>
+
+</body>
+</html>
+
+listDoktor:
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Untitled Document</title>
+<link rel="stylesheet" type="text/css" href="includes.css" />
+</head>
+
+<body>
+<?php include ("header.php"); ?>
+
+<?php
+//make the query
+$q = "SELECT ID, FirstName, LastName, Specialization, Password FROM Doktor ORDER BY ID";
+
+//run the query
+$result = @mysqli_query ($connect, $q);
+
+//if it ran without a problem, display the records
+if ($result) {
+  //Table heading
+  echo '<table border="2">
+  <tr><td><b>Edit</b></td>
+  <td><b>Delete</b></td>
+  <td><b>ID</b></td>
+  <td><b>First Name</b></td>
+  <td><b>Last Name</b></td>
+  <td><b>Specialization</b></td>
+  <td><b>Password</b></td></tr>';
+
+  //Fetch and print all the records
+  while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
+    echo '<tr>
+    <td><a href="edit_doktor.php?id=' . $row['ID'] . '">Edit</a></td>
+    <td><a href="delete_doktor.php?id=' . $row['ID'] . '">Delete</a></td>
+    <td>' . $row['ID'] . '</td>
+    <td>' . $row['FirstName'] . '</td>
+    <td>' . $row['LastName'] . '</td>
+    <td>' . $row['Specialization'] . '</td>
+    <td>' . $row['Password'] . '</td>
+    </tr>';
+  }
+
+  echo '</table>';
+
+  //free up the resources
+  mysqli_free_result ($result);
+
+} else {
+  //error message
+  echo '<p class="error">The current student could not be retrieved. We apologize for any inconvenience.</p>';
+  
+  //debugging message
+  echo '<p>' . mysqli_error($connect) . '<br><br>Query: ' . $q . '</p>';
+}
+
+//close the database connection
+mysqli_close($connect);
+?>
+
+</div>
+</div>
+</body>
+</html>
+
+Edit_doktor:
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Untitled Document</title>
+</head>
+
+<body>
+<?php include ("header.php"); ?>
+
+<h2> Edit a record </h2>
+
+<?php
+//look for a valid user id, either through GET or POST
+if (isset ($_GET['id']) && (is_numeric($_GET['id']))) {
+  $id = $_GET['id'];
+} elseif ((isset ($_POST['id'])) && (is_numeric($_POST['id']))) {
+  $id = $_POST['id'];
+} else {
+  echo '<p class="error">This page has been accessed in error.</p>';
+  exit();
+}
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+  $error = array();
+  
+  //look for Firstname
+  if (empty($_POST['FirstName'])) {
+    $error[] = 'You forgot to enter the First Name.';
+  } else {
+    $n = mysqli_real_escape_string($connect, trim($_POST['FirstName']));
+  }
+
+  //look for Lastname
+  if (empty($_POST['LastName'])) {
+    $error[] = 'You forgot to enter the Last Name.';
+  } else {
+    $l = mysqli_real_escape_string($connect, trim($_POST['LastName']));
+  }
+
+  //look for Specialization
+  if (empty($_POST['Specialization'])) {
+    $error[] = 'You forgot to enter the Specialization.';
+  } else {
+    $s = mysqli_real_escape_string($connect, trim($_POST['Specialization']));
+  }
+
+  //look for Password
+  if (empty($_POST['Password'])) {
+    $error[] = 'You forgot to enter the Password.';
+  } else {
+    $p = mysqli_real_escape_string($connect, trim($_POST['Password']));
+  }
+
+  //if no problem occurred
+  if (empty($error)) {
+    $q = "SELECT ID FROM doktor WHERE Specialization='$s' AND ID != $id";
+    $result = @mysqli_query($connect, $q);
+    
+    if (mysqli_num_rows($result) == 0) {
+      $q = "UPDATE doktor SET FirstName='$n', LastName='$l', Specialization='$s', Password='$p' WHERE ID='$id' LIMIT 1";
+      $result = @mysqli_query($connect, $q);
+      
+      if (mysqli_affected_rows($connect) == 1) {
+        echo '<h3>The user has been edited</h3>';
+      } else {
+        echo '<p class="error">The user has not been edited due to the system error. We apologize for any inconvenience.</p>';
+        echo '<p>'. mysqli_error($connect) . '<br /> query: ' . $q . '</p>';
+      }
+    } else {
+      echo '<p class="error">The no ic has already been registered</p>';
+    }
+  } else {
+    echo '<p class="error">The following error(s) occurred: <br />';
+    foreach ($error as $msg) {
+      echo " - $msg<br />\n";
+    }
+    echo '</p><p>Please try again.</p>';
+  }
+}
+
+$q = "SELECT FirstName, LastName, Specialization, Password FROM doktor WHERE ID=$id";
+$result = @mysqli_query($connect, $q);
+
+if (mysqli_num_rows($result) == 1) {
+  //get patient information
+  $row = mysqli_fetch_array($result, MYSQLI_NUM);
+
+  //create the form
+  echo '<form action="edit_doktor.php" method="post">
+  <p><label class = "label" for="FirstName"> First Name: </label> 
+  <input id = "FirstName" type = "text" name = "FirstName" size="30" maxlength="30" value="' . $row[0] . '"/></p>';
+  
+  echo '<p><br><label class = "label" for="LastName"> Last Name </label>
+  <input id = "LastName" type = "text" name = "LastName" size="30" maxlength="30" value="' . $row[1] . '"/></p>';
+  
+  echo '<p><br><label class = "label" for="Specialization"> Specialization: </label>
+  <input id = "Specialization" type = "text" name = "Specialization" size="30" maxlength="30" value="' . $row[2] . '"/></p>';
+  
+  echo '<p><br><label class = "label" for="Password"> Password: </label>
+  <input id = "Password" type = "text" name = "Password" size="30" maxlength="30" value="' . $row[3] . '"/></p>';
+  
+  echo '<br><p><input id = "submit" type="submit" name="submit" value="Edit"/></p>';
+  
+  echo '<br><input type="hidden" name="id" value="' . $id . '"/>';
+  
+  echo '</form>';
+} else {
+  echo '<p class="error">This page has been accessed in error.</p>';
+}
+
+mysqli_close($connect);
+?>
+</body>
+</html>
+
+
+
+
+Delete_doctor:
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Untitled Document</title>
+</head>
+
+<body>
+<?php include ("header.php"); ?>
+
+<h2> Delete a record </h2>
+
+<?php
+//look for a valid user id, either through GET or POST
+if (isset($_GET['id']) && is_numeric($_GET['id'])) {
+    $id = $_GET['id'];
+} elseif (isset($_POST['id']) && is_numeric($_POST['id'])) {
+    $id = $_POST['id'];
+} else {
+    echo '<p class="error">This page has been accessed in error.</p>';
+    exit();
+}
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    if ($_POST['sure'] == 'Yes') { // Delete the record
+        $q = "DELETE FROM doktor WHERE ID=$id LIMIT 1";
+        $result = @mysqli_query($connect, $q);
+
+        if (mysqli_affected_rows($connect) == 1) { //if there was no problem
+            //display message
+            echo '<h3> The record has been deleted.</h3>';
+        } else {
+            //display error message
+            echo '<p class="error">The record could not be deleted.<br>Probably because it does not exist or due to system error. </p>';
+            echo '<p>' . mysqli_error($connect) . '<br>Query: ' . $q . '</p>'; //debugging message
+        }
+    } else {
+        echo '<h3>The user has NOT been deleted.</h3>';
+    }
+} else { //display the form
+    $q = "SELECT FirstName FROM doktor WHERE ID=$id";
+    $result = @mysqli_query($connect, $q);
+
+    if (mysqli_num_rows($result) == 1) {
+        //Get the member's data
+        $row = mysqli_fetch_array($result, MYSQLI_NUM);
+        echo '<h3>Are you sure you want to permanently delete ' . $row[0] . '?</h3>';
+        echo '<form action="delete_doktor.php" method="post">
+        <input id="submit-no" type="submit" name="sure" value="Yes">
+        <input id="submit-no" type="submit" name="sure" value="No">
+        <input type="hidden" name="id" value="' . $id . '">
+        </form>';
+    } else {
+        echo '<p class="error">This page has been accessed in error.</p>';
+    }
+}
+
+mysqli_close($connect);
+?>
+
+</body>
+</html>
+
+lab task 7:
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Untitled Document</title>
+</head>
+
+<body>
+<?php include("header.php"); ?>
+
+<form action="recordfound_doktor.php" method="post">
+
+<h1>Search record doktor</h1>
+<p><label class="label" for="ID">No id: </label>
+<input id="ID" type="text" name="ID" size="30" maxlength="30"
+value="<?php if (isset($_POST['ID'])) echo $_POST['ID']; ?>" /></p>
+
+<p><input id="submit" type="submit" name="submit" value="search" /></p>
+
+</form>
+</body>
+</html>
+
+search pesakit:
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Untitled Document</title>
+</head>
+
+<body>
+<?php include ("header.php"); ?>
+
+<form action="recordfound_pesakit.php" method="post">
+
+<h1>Search record patient</h1>
+<p><label class = "label" for = "Insurance_Number"> Insurance Number: </label>
+<input id = "Insurance_Number" type = "text" name = "Insurance_Number" size="30" maxlength="30" 
+value="<?php if (isset($_POST['Insurance_Number'])) echo $_POST['Insurance_Number']; ?>" /></p>
+
+<p><input id = "submit" type="submit" name="submit" value="search" /></p>
+
+</form>
+</body>
+</html>
+
+searcch_doktor:
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Untitled Document</title>
+</head>
+
+<body>
+<?php include("header.php"); ?>
+
+<form action="recordfound_doktor.php" method="post">
+
+<h1>Search record doktor</h1>
+<p><label class="label" for="ID">No id: </label>
+<input id="ID" type="text" name="ID" size="30" maxlength="30"
+value="<?php if (isset($_POST['ID'])) echo $_POST['ID']; ?>" /></p>
+
+<p><input id="submit" type="submit" name="submit" value="search" /></p>
+
+</form>
+</body>
+</html>
